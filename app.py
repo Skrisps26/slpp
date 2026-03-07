@@ -26,7 +26,9 @@ st.set_page_config(
 )
 
 # ── Project imports ──────────────────────────────────────────────────────────
-sys.path.insert(0, str(Path(__file__).parent))
+_ROOT = Path(__file__).resolve().parent
+if str(_ROOT) not in sys.path:
+    sys.path.insert(0, str(_ROOT))
 from src.nlp_engine import MedicalNLPEngine
 from src.pdf_builder import PDFBuilder
 from src.soap_builder import SOAPBuilder

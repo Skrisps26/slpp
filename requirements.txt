@@ -1,16 +1,5 @@
-# MedScribe – Requirements
-# Install with: pip install -r requirements.txt
-
-# Core
-streamlit
-reportlab
-numpy
-scipy
-pandas
-
-
-sounddevice
-
-# Optional: local speech-to-text (no API key, model downloads once ~140MB)
-# Uncomment to enable automatic transcription of recorded audio:
-# openai-whisper
+streamlit>=1.28.0
+reportlab>=4.0.0
+numpy>=1.24.0
+scipy>=1.10.0
+pandas>=2.0.0

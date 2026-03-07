@@ -293,19 +293,56 @@ def render_flag(text: str):
 
 
 def transcribe_audio(audio_bytes: bytes) -> str:
-    """Try Whisper transcription. Returns transcript string."""
+    """
+    Transcribe audio bytes with Whisper.
+    Loads audio via scipy (no ffmpeg needed) and passes a float32
+    numpy array directly to whisper.transcribe() — works on Streamlit Cloud.
+    Returns transcript string, or None if Whisper is not installed.
+    """
     try:
+        import numpy as np
+        import scipy.io.wavfile as wav_io
         import whisper
-
-        with tempfile.NamedTemporaryFile(suffix=".wav", delete=False) as f:
-            f.write(audio_bytes)
-            tmp_path = f.name
-        with st.spinner("🎙️ Transcribing with Whisper (local)..."):
-            model = whisper.load_model("base")
-            result = model.transcribe(tmp_path, language="en", fp16=False)
-        os.unlink(tmp_path)
-        return result["text"].strip()
     except ImportError:
+        return None
+
+    try:
+        with st.spinner("🎙️ Transcribing with Whisper..."):
+            # Load WAV via scipy (no ffmpeg dependency)
+            audio_buf = io.BytesIO(audio_bytes)
+            sample_rate, audio_data = wav_io.read(audio_buf)
+
+            # Convert to float32 in range [-1, 1] as Whisper expects
+            if audio_data.dtype == np.int16:
+                audio_float = audio_data.astype(np.float32) / 32768.0
+            elif audio_data.dtype == np.int32:
+                audio_float = audio_data.astype(np.float32) / 2147483648.0
+            elif audio_data.dtype == np.uint8:
+                audio_float = (audio_data.astype(np.float32) - 128.0) / 128.0
+            else:
+                audio_float = audio_data.astype(np.float32)
+
+            # Stereo to mono
+            if audio_float.ndim == 2:
+                audio_float = audio_float.mean(axis=1)
+
+            # Resample to 16000 Hz if needed (Whisper requires 16kHz)
+            if sample_rate != 16000:
+                try:
+                    import scipy.signal as signal
+
+                    num_samples = int(len(audio_float) * 16000 / sample_rate)
+                    audio_float = signal.resample(audio_float, num_samples)
+                except Exception:
+                    pass
+
+            # Run Whisper on the numpy array directly
+            model = whisper.load_model("base")
+            result = model.transcribe(audio_float, language="en", fp16=False)
+            return result["text"].strip()
+
+    except Exception as e:
+        st.warning(f"Transcription failed: {e}. Please paste the transcript manually.")
         return None
 
 

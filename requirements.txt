@@ -8,9 +8,8 @@ numpy
 scipy
 pandas
 
-# Audio recording (browser-based via Streamlit, no system drivers needed)
-# sounddevice only needed if doing programmatic recording outside Streamlit
-# sounddevice>=0.4.6
+
+sounddevice
 
 # Optional: local speech-to-text (no API key, model downloads once ~140MB)
 # Uncomment to enable automatic transcription of recorded audio:

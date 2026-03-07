@@ -9,7 +9,7 @@ from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
 
-from nlp_engine import ClinicalEntities, Diagnosis, Medication, Symptom, Vital
+from src.nlp_engine import ClinicalEntities, Diagnosis, Medication, Symptom, Vital
 
 
 @dataclass

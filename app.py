@@ -29,10 +29,10 @@ st.set_page_config(
 _ROOT = Path(__file__).resolve().parent
 if str(_ROOT) not in sys.path:
     sys.path.insert(0, str(_ROOT))
-from src.nlp_engine import MedicalNLPEngine
-from src.pdf_builder import PDFBuilder
-from src.soap_builder import SOAPBuilder
-from src.transcriber import load_transcript_from_file
+from nlp_engine import MedicalNLPEngine
+from pdf_builder import PDFBuilder
+from soap_builder import SOAPBuilder
+from transcriber import load_transcript_from_file
 
 # ── Global CSS ───────────────────────────────────────────────────────────────
 st.markdown(

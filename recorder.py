@@ -4,29 +4,30 @@ Records microphone input using sounddevice and saves as WAV.
 """
 
 import os
-import wave
 import threading
 import time
+import wave
 from datetime import datetime
 from pathlib import Path
 
 import numpy as np
+
 try:
     import sounddevice as sd
+
     AUDIO_AVAILABLE = True
 except (ImportError, OSError):
     sd = None
     AUDIO_AVAILABLE = False
 
 
-SAMPLE_RATE = 16000   # 16 kHz – ideal for speech
+SAMPLE_RATE = 16000  # 16 kHz – ideal for speech
 CHANNELS = 1
 DTYPE = "int16"
 CHUNK_SIZE = 1024
 
 
 class AudioRecorder:
-
     def __init__(self, output_dir: str = "recordings"):
         self.output_dir = Path(output_dir)
         self.output_dir.mkdir(parents=True, exist_ok=True)
@@ -41,7 +42,9 @@ class AudioRecorder:
 
     def start(self) -> str:
         if not AUDIO_AVAILABLE:
-            raise RuntimeError("Audio recording unavailable: PortAudio library not found. Install portaudio19-dev.")
+            raise RuntimeError(
+                "Audio recording unavailable: PortAudio library not found. Install portaudio19-dev."
+            )
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         self.output_path = str(self.output_dir / f"encounter_{timestamp}.wav")
         self._frames = []

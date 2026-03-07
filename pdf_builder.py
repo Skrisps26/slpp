@@ -23,7 +23,8 @@ from reportlab.platypus import (
     TableStyle,
 )
 from reportlab.platypus.flowables import Flowable
-from src.soap_builder import SOAPNote
+
+from soap_builder import SOAPNote
 
 # ─────────────────────────── Color palette ──────────────────────────────────
 

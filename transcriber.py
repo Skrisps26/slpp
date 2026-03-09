@@ -3,8 +3,8 @@ Transcriber
 Uses OpenAI Whisper (local) if installed, otherwise prompts for manual transcript entry.
 """
 
-import sys
 import os
+import sys
 from pathlib import Path
 
 
@@ -24,6 +24,7 @@ def transcribe(audio_path: str, progress_callback=None) -> tuple[str, str]:
 def _try_whisper(audio_path: str, progress_callback=None) -> str | None:
     try:
         import whisper
+
         if progress_callback:
             progress_callback("Loading Whisper model (base)...")
         model = whisper.load_model("base")

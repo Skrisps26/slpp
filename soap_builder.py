@@ -5,11 +5,11 @@ Adds clinical reasoning, flags, and recommendations.
 """
 
 import re
-from datetime import datetime
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import Optional
 
-from nlp_engine import ClinicalEntities, Symptom, Medication, Vital, Diagnosis
+from nlp_engine import ClinicalEntities, Diagnosis, Medication, Symptom, Vital
 
 
 @dataclass
@@ -31,7 +31,7 @@ class SOAPNote:
 
     # SOAP sections
     chief_complaint: str = ""
-    hpi: str = ""                          # History of Present Illness
+    hpi: str = ""  # History of Present Illness
     subjective_summary: str = ""
 
     vitals_summary: list[Vital] = field(default_factory=list)
@@ -108,50 +108,66 @@ def _flag_bp(value_str: str) -> Optional[str]:
         pass
     return None
 
+
 def _flag_hr(value_str: str) -> Optional[str]:
     try:
         hr = int(value_str.split()[0])
-        if hr > 120: return f"⚠️  ALERT: HR {hr} bpm – Tachycardia"
-        if hr > 100: return f"📋  NOTE: HR {hr} bpm – Mildly elevated"
-        if hr < 50: return f"⚠️  ALERT: HR {hr} bpm – Bradycardia"
+        if hr > 120:
+            return f"⚠️  ALERT: HR {hr} bpm – Tachycardia"
+        if hr > 100:
+            return f"📋  NOTE: HR {hr} bpm – Mildly elevated"
+        if hr < 50:
+            return f"⚠️  ALERT: HR {hr} bpm – Bradycardia"
     except ValueError:
         pass
     return None
+
 
 def _flag_temp(value_str: str) -> Optional[str]:
     try:
         t = float(re.sub(r"[^\d.]", "", value_str))
-        if t >= 103.0: return f"🚨 CRITICAL: Temp {t}°F – High fever"
-        if t >= 100.4: return f"⚠️  ALERT: Temp {t}°F – Fever"
-        if t < 96.0: return f"⚠️  ALERT: Temp {t}°F – Hypothermia"
+        if t >= 103.0:
+            return f"🚨 CRITICAL: Temp {t}°F – High fever"
+        if t >= 100.4:
+            return f"⚠️  ALERT: Temp {t}°F – Fever"
+        if t < 96.0:
+            return f"⚠️  ALERT: Temp {t}°F – Hypothermia"
     except ValueError:
         pass
     return None
+
 
 def _flag_o2(value_str: str) -> Optional[str]:
     try:
         o2 = float(re.sub(r"[^\d.]", "", value_str))
-        if o2 < 88: return f"🚨 CRITICAL: SpO2 {o2}% – Severe hypoxia"
-        if o2 < 92: return f"⚠️  ALERT: SpO2 {o2}% – Hypoxia – supplemental O2 indicated"
-        if o2 < 95: return f"📋  NOTE: SpO2 {o2}% – Low-normal"
+        if o2 < 88:
+            return f"🚨 CRITICAL: SpO2 {o2}% – Severe hypoxia"
+        if o2 < 92:
+            return f"⚠️  ALERT: SpO2 {o2}% – Hypoxia – supplemental O2 indicated"
+        if o2 < 95:
+            return f"📋  NOTE: SpO2 {o2}% – Low-normal"
     except ValueError:
         pass
     return None
 
+
 def _flag_glucose(value_str: str) -> Optional[str]:
     try:
         g = float(re.sub(r"[^\d.]", "", value_str))
-        if g > 500: return f"🚨 CRITICAL: Glucose {g} mg/dL – Severe hyperglycemia"
-        if g > 250: return f"⚠️  ALERT: Glucose {g} mg/dL – Hyperglycemia"
-        if g < 54: return f"🚨 CRITICAL: Glucose {g} mg/dL – Severe hypoglycemia"
-        if g < 70: return f"⚠️  ALERT: Glucose {g} mg/dL – Hypoglycemia"
+        if g > 500:
+            return f"🚨 CRITICAL: Glucose {g} mg/dL – Severe hyperglycemia"
+        if g > 250:
+            return f"⚠️  ALERT: Glucose {g} mg/dL – Hyperglycemia"
+        if g < 54:
+            return f"🚨 CRITICAL: Glucose {g} mg/dL – Severe hypoglycemia"
+        if g < 70:
+            return f"⚠️  ALERT: Glucose {g} mg/dL – Hypoglycemia"
     except ValueError:
         pass
     return None
 
 
 class SOAPBuilder:
-
     def build(
         self,
         entities: ClinicalEntities,
@@ -159,7 +175,6 @@ class SOAPBuilder:
         patient_info: dict,
         pre_existing: dict,
     ) -> SOAPNote:
-
         now = datetime.now()
         note = SOAPNote(
             encounter_date=now.strftime("%B %d, %Y"),
@@ -168,7 +183,9 @@ class SOAPBuilder:
             patient_dob=patient_info.get("patient_dob", "Unknown"),
             patient_id=patient_info.get("patient_id", ""),
             physician_name=patient_info.get("doctor_name", "Unknown"),
-            physician_specialty=patient_info.get("doctor_specialty", "General Practice"),
+            physician_specialty=patient_info.get(
+                "doctor_specialty", "General Practice"
+            ),
             facility=patient_info.get("facility", "Medical Facility"),
             encounter_type=patient_info.get("encounter_type", "Office Visit"),
             raw_transcript=transcript,
@@ -184,7 +201,9 @@ class SOAPBuilder:
             note.patient_age = None
 
         # Chief complaint
-        note.chief_complaint = self._extract_chief_complaint(transcript, patient_info, entities)
+        note.chief_complaint = self._extract_chief_complaint(
+            transcript, patient_info, entities
+        )
 
         # HPI
         note.hpi = self._build_hpi(entities, transcript, note.chief_complaint)
@@ -203,11 +222,17 @@ class SOAPBuilder:
 
         # Diagnoses
         if entities.diagnoses:
-            note.primary_diagnosis = next((d for d in entities.diagnoses if d.primary), entities.diagnoses[0])
-            note.secondary_diagnoses = [d for d in entities.diagnoses if d != note.primary_diagnosis]
+            note.primary_diagnosis = next(
+                (d for d in entities.diagnoses if d.primary), entities.diagnoses[0]
+            )
+            note.secondary_diagnoses = [
+                d for d in entities.diagnoses if d != note.primary_diagnosis
+            ]
 
         # Differentials
-        note.differential_diagnoses = self._build_differentials(entities, note.chief_complaint)
+        note.differential_diagnoses = self._build_differentials(
+            entities, note.chief_complaint
+        )
 
         # Assessment narrative
         note.assessment_narrative = self._build_assessment(note, entities)
@@ -230,18 +255,31 @@ class SOAPBuilder:
 
         return note
 
-    def _extract_chief_complaint(self, text: str, info: dict, entities: ClinicalEntities) -> str:
+    def _extract_chief_complaint(
+        self, text: str, info: dict, entities: ClinicalEntities
+    ) -> str:
         # From pre-existing info
         if info.get("chief_complaint"):
             return info["chief_complaint"]
 
         # From transcript
         cc_patterns = [
-            re.compile(r"(?:chief complaint|presenting with|here (?:today )?(?:for|because|with))[:\s]+([^.!\n]+)", re.I),
-            re.compile(r"(?:came in|presents?)[:\s]*(?:today\s*)?(?:with|for)\s+([^.!\n]+)", re.I),
-            re.compile(r"patient (?:is )?(?:complaining of|reports?|has)\s+([^.!\n]+)", re.I),
+            re.compile(
+                r"(?:chief complaint|presenting with|here (?:today )?(?:for|because|with))[:\s]+([^.!\n]+)",
+                re.I,
+            ),
+            re.compile(
+                r"(?:came in|presents?)[:\s]*(?:today\s*)?(?:with|for)\s+([^.!\n]+)",
+                re.I,
+            ),
+            re.compile(
+                r"patient (?:is )?(?:complaining of|reports?|has)\s+([^.!\n]+)", re.I
+            ),
             # Catch "I've been having X" or "I have X" as first patient statement
-            re.compile(r"(?:patient|pt)\s*:[^\n]*(?:i(?:'ve)?\s+been\s+having|i\s+have|i(?:'ve)?\s+had|i\s+keep)\s+([^.!\n]{5,80})", re.I),
+            re.compile(
+                r"(?:patient|pt)\s*:[^\n]*(?:i(?:'ve)?\s+been\s+having|i\s+have|i(?:'ve)?\s+had|i\s+keep)\s+([^.!\n]{5,80})",
+                re.I,
+            ),
         ]
         for pat in cc_patterns:
             m = pat.search(text)
@@ -273,7 +311,7 @@ class SOAPBuilder:
         parts.append(desc + ".")
 
         if len(active) > 1:
-            assoc = ", ".join(s.name.lower() for s in active[1:min(4, len(active))])
+            assoc = ", ".join(s.name.lower() for s in active[1 : min(4, len(active))])
             parts.append(f"Associated symptoms include {assoc}.")
 
         negated = [s for s in entities.symptoms if s.negated]
@@ -287,7 +325,9 @@ class SOAPBuilder:
         lines = []
         active = [s for s in entities.symptoms if not s.negated]
         if active:
-            lines.append(f"The patient reports {len(active)} symptom(s) on presentation.")
+            lines.append(
+                f"The patient reports {len(active)} symptom(s) on presentation."
+            )
         return " ".join(lines)
 
     def _build_objective(self, entities: ClinicalEntities) -> str:
@@ -296,9 +336,13 @@ class SOAPBuilder:
             return f"Vital signs obtained: {v_str}."
         return "Vital signs not documented in transcript."
 
-    def _merge_medications(self, note: "SOAPNote", entities: ClinicalEntities, pre_existing: dict):
+    def _merge_medications(
+        self, note: "SOAPNote", entities: ClinicalEntities, pre_existing: dict
+    ):
         prescribed = [m for m in entities.medications if m.status == "prescribed"]
-        current = [m for m in entities.medications if m.status in ("current", "mentioned")]
+        current = [
+            m for m in entities.medications if m.status in ("current", "mentioned")
+        ]
         discontinued = [m for m in entities.medications if m.status == "discontinued"]
 
         # Add pre-existing medications from form
@@ -320,34 +364,55 @@ class SOAPBuilder:
         # Symptom-based differential generation
         ddx_map = {
             "chest pain": [
-                "Acute Coronary Syndrome (ACS)", "Musculoskeletal chest wall pain",
-                "Gastroesophageal reflux disease", "Pulmonary embolism",
-                "Pneumothorax", "Pericarditis", "Aortic dissection",
+                "Acute Coronary Syndrome (ACS)",
+                "Musculoskeletal chest wall pain",
+                "Gastroesophageal reflux disease",
+                "Pulmonary embolism",
+                "Pneumothorax",
+                "Pericarditis",
+                "Aortic dissection",
             ],
             "shortness of breath": [
-                "Community-acquired pneumonia", "Acute asthma exacerbation",
-                "COPD exacerbation", "Pulmonary embolism",
-                "Congestive heart failure", "Pneumothorax", "Anemia",
+                "Community-acquired pneumonia",
+                "Acute asthma exacerbation",
+                "COPD exacerbation",
+                "Pulmonary embolism",
+                "Congestive heart failure",
+                "Pneumothorax",
+                "Anemia",
             ],
             "abdominal pain": [
-                "Acute appendicitis", "Peptic ulcer disease",
-                "Gastroenteritis", "Cholecystitis",
-                "Ovarian pathology", "Mesenteric ischemia", "Renal colic",
+                "Acute appendicitis",
+                "Peptic ulcer disease",
+                "Gastroenteritis",
+                "Cholecystitis",
+                "Ovarian pathology",
+                "Mesenteric ischemia",
+                "Renal colic",
             ],
             "headache": [
-                "Tension-type headache", "Migraine without aura",
-                "Cluster headache", "Hypertensive headache",
-                "Cervicogenic headache", "Intracranial hypertension",
+                "Tension-type headache",
+                "Migraine without aura",
+                "Cluster headache",
+                "Hypertensive headache",
+                "Cervicogenic headache",
+                "Intracranial hypertension",
             ],
             "fever": [
-                "Viral upper respiratory infection", "Bacterial infection (unspecified)",
-                "Urinary tract infection", "Community-acquired pneumonia",
-                "Influenza", "COVID-19",
+                "Viral upper respiratory infection",
+                "Bacterial infection (unspecified)",
+                "Urinary tract infection",
+                "Community-acquired pneumonia",
+                "Influenza",
+                "COVID-19",
             ],
             "dizziness": [
                 "Benign paroxysmal positional vertigo (BPPV)",
-                "Orthostatic hypotension", "Labyrinthitis / vestibular neuritis",
-                "Anemia", "Hypoglycemia", "Cardiac arrhythmia",
+                "Orthostatic hypotension",
+                "Labyrinthitis / vestibular neuritis",
+                "Anemia",
+                "Hypoglycemia",
+                "Cardiac arrhythmia",
             ],
         }
 
@@ -367,15 +432,19 @@ class SOAPBuilder:
         parts = []
         name = note.patient_name
         age = f"{note.patient_age}-year-old" if note.patient_age else ""
-        
+
         primary_str = ""
         if note.primary_diagnosis:
             d = note.primary_diagnosis
             primary_str = f"Primary impression is {d.name} (ICD-10: {d.icd10})"
         else:
-            primary_str = f"The clinical presentation is consistent with {note.chief_complaint}"
+            primary_str = (
+                f"The clinical presentation is consistent with {note.chief_complaint}"
+            )
 
-        parts.append(f"{name} is a {age} patient presenting with {note.chief_complaint}. {primary_str}.")
+        parts.append(
+            f"{name} is a {age} patient presenting with {note.chief_complaint}. {primary_str}."
+        )
 
         if note.secondary_diagnoses:
             comorbidities = ", ".join(d.name for d in note.secondary_diagnoses[:3])
@@ -388,7 +457,9 @@ class SOAPBuilder:
         active_symptoms = [s for s in entities.symptoms if not s.negated]
         if active_symptoms:
             sym_names = ", ".join(s.name for s in active_symptoms[:4])
-            parts.append(f"The symptom constellation ({sym_names}) informs the clinical reasoning above.")
+            parts.append(
+                f"The symptom constellation ({sym_names}) informs the clinical reasoning above."
+            )
 
         return " ".join(parts)
 
@@ -421,7 +492,9 @@ class SOAPBuilder:
                     items.append(plan_text)
 
         if not items:
-            items.append("Clinical management per physician discretion based on encounter findings.")
+            items.append(
+                "Clinical management per physician discretion based on encounter findings."
+            )
 
         return list(dict.fromkeys(items))  # deduplicate
 
@@ -433,13 +506,21 @@ class SOAPBuilder:
         if note.follow_up:
             parts.append(f"Follow-up: {note.follow_up}.")
         if not parts:
-            parts.append("Management plan detailed above. Patient instructed to return if symptoms worsen or new symptoms develop.")
+            parts.append(
+                "Management plan detailed above. Patient instructed to return if symptoms worsen or new symptoms develop."
+            )
         return " ".join(parts)
 
     def _extract_follow_up(self, text: str, plan_items: list[str]) -> str:
         patterns = [
-            re.compile(r"(?:follow.?up|return|come back|see (?:me|you|us))\s+(?:in\s+)?([^.!\n]{3,100})", re.I),
-            re.compile(r"(?:appointment|visit)\s+(?:in\s+)?(\d+\s*(?:day|days|week|weeks|month|months))", re.I),
+            re.compile(
+                r"(?:follow.?up|return|come back|see (?:me|you|us))\s+(?:in\s+)?([^.!\n]{3,100})",
+                re.I,
+            ),
+            re.compile(
+                r"(?:appointment|visit)\s+(?:in\s+)?(\d+\s*(?:day|days|week|weeks|month|months))",
+                re.I,
+            ),
         ]
         for pat in patterns:
             m = pat.search(text)

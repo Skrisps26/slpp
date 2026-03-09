@@ -760,7 +760,7 @@ def main():
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px;">
         <span style="font-size:2.2rem;">🏥</span>
         <div>
-            <h1 style="margin:0;font-size:1.9rem;color:#1A3557;font-weight:800;">MedScribe</h1>
+            <h1 style="margin:0;font-size:1.9rem;color:#1A3557;font-weight:800;">DoctorSpeak</h1>
             <p style="margin:0;color:#6B7C8D;font-size:0.85rem;">
                 Local AI Clinical Documentation &nbsp;·&nbsp; No API required &nbsp;·&nbsp;
                 Record → Extract → SOAP Report

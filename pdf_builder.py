@@ -340,7 +340,7 @@ class PDFBuilder:
     def build(self, note: SOAPNote) -> str:
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         safe_name = "".join(c if c.isalnum() else "_" for c in note.patient_name)
-        filename = f"MedScribe_{safe_name}_{timestamp}.pdf"
+        filename = f"DoctorSpeak_{safe_name}_{timestamp}.pdf"
         output_path = str(self.output_dir / filename)
 
         doc = SimpleDocTemplate(

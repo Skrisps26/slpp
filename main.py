@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 """
 MedScribe – AI-Powered Clinical Documentation System
 Records doctor-patient interactions and generates comprehensive SOAP reports.

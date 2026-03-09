@@ -1,5 +1,5 @@
 """
-MedScribe – Streamlit UI
+DoctorSpeak – Streamlit UI
 Fully local medical documentation system.
 Run with: streamlit run app.py
 """
@@ -19,7 +19,7 @@ import streamlit as st
 
 # ── Page config must be first ────────────────────────────────────────────────
 st.set_page_config(
-    page_title="MedScribe – Clinical Documentation",
+    page_title="DoctorSpeak – Clinical Documentation",
     page_icon="🏥",
     layout="wide",
     initial_sidebar_state="expanded",

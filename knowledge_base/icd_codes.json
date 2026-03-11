@@ -1,0 +1,492 @@
+{
+    "symptom_to_icd10": {
+        "Chest pain": {
+            "code": "R07.9",
+            "description": "Chest pain, unspecified"
+        },
+        "Chest pressure": {
+            "code": "R07.9",
+            "description": "Chest pain, unspecified"
+        },
+        "Chest tightness": {
+            "code": "R07.89",
+            "description": "Other chest pain"
+        },
+        "Shortness of breath": {
+            "code": "R06.00",
+            "description": "Dyspnea, unspecified"
+        },
+        "Dyspnea": {
+            "code": "R06.00",
+            "description": "Dyspnea, unspecified"
+        },
+        "Cough": {
+            "code": "R05.9",
+            "description": "Cough, unspecified"
+        },
+        "Productive cough": {
+            "code": "R05.9",
+            "description": "Cough, unspecified"
+        },
+        "Dry cough": {
+            "code": "R05.9",
+            "description": "Cough, unspecified"
+        },
+        "Hemoptysis": {
+            "code": "R04.2",
+            "description": "Haemoptysis"
+        },
+        "Wheezing": {
+            "code": "R06.2",
+            "description": "Wheezing"
+        },
+        "Headache": {
+            "code": "R51.9",
+            "description": "Headache, unspecified"
+        },
+        "Cephalgia": {
+            "code": "R51.9",
+            "description": "Headache, unspecified"
+        },
+        "Migraine": {
+            "code": "G43.909",
+            "description": "Migraine, unspecified"
+        },
+        "Nausea": {
+            "code": "R11.0",
+            "description": "Nausea"
+        },
+        "Vomiting": {
+            "code": "R11.10",
+            "description": "Vomiting, unspecified"
+        },
+        "Nausea and vomiting": {
+            "code": "R11.2",
+            "description": "Nausea with vomiting"
+        },
+        "Abdominal pain": {
+            "code": "R10.9",
+            "description": "Unspecified abdominal pain"
+        },
+        "Epigastric pain": {
+            "code": "R10.13",
+            "description": "Epigastric pain"
+        },
+        "Lower abdominal pain": {
+            "code": "R10.30",
+            "description": "Lower abdominal pain"
+        },
+        "Diarrhea": {
+            "code": "R19.7",
+            "description": "Diarrhoea, unspecified"
+        },
+        "Constipation": {
+            "code": "K59.00",
+            "description": "Constipation, unspecified"
+        },
+        "Heartburn": {
+            "code": "R12",
+            "description": "Heartburn"
+        },
+        "Bloating": {
+            "code": "R14.0",
+            "description": "Abdominal distension"
+        },
+        "Jaundice": {
+            "code": "R17",
+            "description": "Unspecified jaundice"
+        },
+        "Hematochezia": {
+            "code": "K92.1",
+            "description": "Melena/rectal bleeding"
+        },
+        "Melena": {
+            "code": "K92.1",
+            "description": "Melena"
+        },
+        "Dysphagia": {
+            "code": "R13.10",
+            "description": "Dysphagia, unspecified"
+        },
+        "Fever": {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+        },
+        "Pyrexia": {
+            "code": "R50.9",
+            "description": "Fever, unspecified"
+        },
+        "Chills": {
+            "code": "R68.83",
+            "description": "Chills (without fever)"
+        },
+        "Fatigue": {
+            "code": "R53.83",
+            "description": "Other fatigue"
+        },
+        "Malaise": {
+            "code": "R53.1",
+            "description": "Weakness"
+        },
+        "Weight loss": {
+            "code": "R63.4",
+            "description": "Abnormal weight loss"
+        },
+        "Unintentional weight loss": {
+            "code": "R63.4",
+            "description": "Abnormal weight loss"
+        },
+        "Weight gain": {
+            "code": "R63.5",
+            "description": "Abnormal weight gain"
+        },
+        "Dizziness": {
+            "code": "R42",
+            "description": "Dizziness and giddiness"
+        },
+        "Vertigo": {
+            "code": "R42",
+            "description": "Dizziness and giddiness"
+        },
+        "Syncope": {
+            "code": "R55",
+            "description": "Syncope and collapse"
+        },
+        "Pre-syncope": {
+            "code": "R55",
+            "description": "Syncope and collapse"
+        },
+        "Palpitations": {
+            "code": "R00.2",
+            "description": "Palpitations"
+        },
+        "Tachycardia": {
+            "code": "R00.0",
+            "description": "Tachycardia, unspecified"
+        },
+        "Bradycardia": {
+            "code": "R00.1",
+            "description": "Bradycardia, unspecified"
+        },
+        "Edema": {
+            "code": "R60.9",
+            "description": "Oedema, unspecified"
+        },
+        "Leg swelling": {
+            "code": "R60.0",
+            "description": "Localized oedema"
+        },
+        "Ankle edema": {
+            "code": "R60.0",
+            "description": "Localized oedema"
+        },
+        "Dysuria": {
+            "code": "R30.0",
+            "description": "Dysuria"
+        },
+        "Urinary frequency": {
+            "code": "R35.0",
+            "description": "Frequency of micturition"
+        },
+        "Urinary urgency": {
+            "code": "R39.15",
+            "description": "Urgency of urination"
+        },
+        "Nocturia": {
+            "code": "R35.1",
+            "description": "Nocturia"
+        },
+        "Hematuria": {
+            "code": "R31.9",
+            "description": "Haematuria, unspecified"
+        },
+        "Urinary incontinence": {
+            "code": "R32",
+            "description": "Unspecified urinary incontinence"
+        },
+        "Testicular pain": {
+            "code": "N50.81",
+            "description": "Epididymal pain"
+        },
+        "Orchialgia": {
+            "code": "N50.81",
+            "description": "Epididymal pain"
+        },
+        "Scrotal pain": {
+            "code": "N50.81",
+            "description": "Epididymal pain"
+        },
+        "Penile pain": {
+            "code": "N48.89",
+            "description": "Other specified disorders of penis"
+        },
+        "Pelvic pain": {
+            "code": "R10.2",
+            "description": "Pelvic and perineal pain"
+        },
+        "Vaginal pain": {
+            "code": "N94.10",
+            "description": "Unspecified vulvodynia"
+        },
+        "Amenorrhea": {
+            "code": "N91.2",
+            "description": "Amenorrhoea, unspecified"
+        },
+        "Dysmenorrhea": {
+            "code": "N94.6",
+            "description": "Dysmenorrhoea, unspecified"
+        },
+        "Menorrhagia": {
+            "code": "N92.0",
+            "description": "Excessive and frequent menstruation"
+        },
+        "Calf pain": {
+            "code": "M79.671",
+            "description": "Pain in right foot"
+        },
+        "Back pain": {
+            "code": "M54.9",
+            "description": "Dorsalgia, unspecified"
+        },
+        "Dorsalgia": {
+            "code": "M54.9",
+            "description": "Dorsalgia, unspecified"
+        },
+        "Neck pain": {
+            "code": "M54.2",
+            "description": "Cervicalgia"
+        },
+        "Cervicalgia": {
+            "code": "M54.2",
+            "description": "Cervicalgia"
+        },
+        "Joint pain": {
+            "code": "M25.50",
+            "description": "Pain in unspecified joint"
+        },
+        "Arthralgia": {
+            "code": "M25.50",
+            "description": "Pain in unspecified joint"
+        },
+        "Muscle pain": {
+            "code": "M79.3",
+            "description": "Panniculitis"
+        },
+        "Myalgia": {
+            "code": "M79.3",
+            "description": "Myalgia"
+        },
+        "Morning stiffness": {
+            "code": "M25.60",
+            "description": "Stiffness of unspecified joint"
+        },
+        "Rash": {
+            "code": "R21",
+            "description": "Rash and other nonspecific skin eruption"
+        },
+        "Pruritus": {
+            "code": "L29.9",
+            "description": "Pruritus, unspecified"
+        },
+        "Urticaria": {
+            "code": "L50.9",
+            "description": "Urticaria, unspecified"
+        },
+        "Numbness": {
+            "code": "R20.0",
+            "description": "Anaesthesia of skin"
+        },
+        "Paresthesia": {
+            "code": "R20.2",
+            "description": "Paraesthesia of skin"
+        },
+        "Tingling": {
+            "code": "R20.2",
+            "description": "Paraesthesia of skin"
+        },
+        "Tremor": {
+            "code": "R25.1",
+            "description": "Tremor, unspecified"
+        },
+        "Seizure": {
+            "code": "R56.9",
+            "description": "Unspecified convulsions"
+        },
+        "Confusion": {
+            "code": "R41.3",
+            "description": "Other amnesia"
+        },
+        "Memory impairment": {
+            "code": "R41.3",
+            "description": "Other amnesia"
+        },
+        "Depression": {
+            "code": "R45.3",
+            "description": "Demoralization and apathy"
+        },
+        "Anxiety": {
+            "code": "R45.1",
+            "description": "Restlessness and agitation"
+        },
+        "Insomnia": {
+            "code": "G47.00",
+            "description": "Insomnia, unspecified"
+        },
+        "Suicidal ideation": {
+            "code": "R45.851",
+            "description": "Homicidal ideations"
+        },
+        "Hallucinations": {
+            "code": "R44.3",
+            "description": "Other hallucinations"
+        },
+        "Polydipsia": {
+            "code": "R63.1",
+            "description": "Polydipsia"
+        },
+        "Polyuria": {
+            "code": "R35.89",
+            "description": "Other polyuria"
+        },
+        "Hot flashes": {
+            "code": "R68.0",
+            "description": "Hypothermia, not associated with low environmental temperature"
+        },
+        "Cold intolerance": {
+            "code": "R68.89",
+            "description": "Other specified general symptoms and signs"
+        },
+        "Night sweats": {
+            "code": "R61",
+            "description": "Generalised hyperhidrosis"
+        },
+        "Diaphoresis": {
+            "code": "R61",
+            "description": "Generalised hyperhidrosis"
+        },
+        "Epistaxis": {
+            "code": "R04.0",
+            "description": "Epistaxis"
+        },
+        "Sore throat": {
+            "code": "J02.9",
+            "description": "Acute pharyngitis, unspecified"
+        },
+        "Pharyngitis": {
+            "code": "J02.9",
+            "description": "Acute pharyngitis, unspecified"
+        },
+        "Nasal congestion": {
+            "code": "R09.81",
+            "description": "Nasal congestion"
+        },
+        "Rhinorrhea": {
+            "code": "J34.89",
+            "description": "Other specified disorders of nose and nasal sinuses"
+        },
+        "Tinnitus": {
+            "code": "H93.19",
+            "description": "Tinnitus, unspecified"
+        },
+        "Hearing loss": {
+            "code": "H91.90",
+            "description": "Unspecified hearing loss"
+        },
+        "Otalgia": {
+            "code": "H92.09",
+            "description": "Otalgia, unspecified"
+        },
+        "Blurred vision": {
+            "code": "H53.8",
+            "description": "Other visual disturbances"
+        },
+        "Diplopia": {
+            "code": "H53.2",
+            "description": "Diplopia"
+        },
+        "Ocular pain": {
+            "code": "H57.10",
+            "description": "Ocular pain, unspecified"
+        },
+        "Conjunctivitis": {
+            "code": "H10.9",
+            "description": "Unspecified conjunctivitis"
+        },
+        "Alopecia": {
+            "code": "L65.9",
+            "description": "Nonscarring hair loss, unspecified"
+        },
+        "Lymphadenopathy": {
+            "code": "R59.9",
+            "description": "Enlarged lymph nodes, unspecified"
+        },
+        "Erectile dysfunction": {
+            "code": "N52.9",
+            "description": "Male erectile dysfunction, unspecified"
+        }
+    },
+    "disease_to_icd10": {
+        "Acute Myocardial Infarction": "I21.9",
+        "Unstable Angina": "I20.0",
+        "Stable Angina": "I20.9",
+        "Pulmonary Embolism": "I26.99",
+        "Community-Acquired Pneumonia": "J18.9",
+        "Congestive Heart Failure": "I50.9",
+        "Hypertensive Crisis": "I16.9",
+        "Hypertension": "I10",
+        "Migraine": "G43.909",
+        "Tension Headache": "G44.209",
+        "Cluster Headache": "G44.009",
+        "Stroke (Ischemic)": "I63.9",
+        "Transient Ischemic Attack": "G45.9",
+        "Type 2 Diabetes Mellitus": "E11.9",
+        "Type 1 Diabetes Mellitus": "E10.9",
+        "Diabetic Ketoacidosis": "E11.10",
+        "Hypoglycemia": "E16.0",
+        "Hypothyroidism": "E03.9",
+        "Hyperthyroidism": "E05.90",
+        "Urinary Tract Infection": "N39.0",
+        "Pyelonephritis": "N10",
+        "Gastroesophageal Reflux Disease": "K21.0",
+        "Peptic Ulcer Disease": "K27.9",
+        "Acute Appendicitis": "K37",
+        "Irritable Bowel Syndrome": "K58.9",
+        "Cholecystitis": "K81.9",
+        "Pancreatitis": "K85.90",
+        "Crohn's Disease": "K50.90",
+        "Ulcerative Colitis": "K51.90",
+        "Asthma": "J45.909",
+        "COPD Exacerbation": "J44.1",
+        "Atrial Fibrillation": "I48.91",
+        "Anemia": "D64.9",
+        "Deep Vein Thrombosis": "I82.401",
+        "Depression": "F32.9",
+        "Generalized Anxiety Disorder": "F41.1",
+        "Panic Disorder": "F41.0",
+        "Bipolar Disorder": "F31.9",
+        "Schizophrenia": "F20.9",
+        "PTSD": "F43.10",
+        "Osteoarthritis": "M17.11",
+        "Rheumatoid Arthritis": "M06.9",
+        "Lumbar Radiculopathy": "M54.4",
+        "Gout": "M10.9",
+        "Fibromyalgia": "M79.3",
+        "Acute Pharyngitis (Streptococcal)": "J02.0",
+        "Sinusitis": "J32.9",
+        "Otitis Media": "H66.9",
+        "Influenza": "J11.1",
+        "COVID-19": "U07.1",
+        "Sepsis": "A41.9",
+        "Cellulitis": "L03.90",
+        "Kidney Stones (Nephrolithiasis)": "N20.0",
+        "Ovarian Cyst": "N83.20",
+        "Ectopic Pregnancy": "O00.90",
+        "Vertigo (BPPV)": "H81.10",
+        "Seizure Disorder": "G40.909",
+        "Testicular Torsion": "N44.00",
+        "Epididymitis": "N45.1",
+        "Benign Prostatic Hyperplasia": "N40.1",
+        "Hyperlipidemia": "E78.5",
+        "Psoriasis": "L40.9"
+    }
+}

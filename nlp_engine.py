@@ -1032,14 +1032,86 @@ class MedicalNLPEngine:
         self.nlp, self.model_name = _load_spacy()
 
         # Pre-compile lexicon regex (longest match first)
+        # Matches base form + common suffixes: s, es, ing, ed, er
         _terms = sorted(COLLOQUIAL_TO_CLINICAL.keys(), key=len, reverse=True)
         self._symptom_re = re.compile(
-            r"\b(" + "|".join(re.escape(t) for t in _terms) + r")(?:s|es)?\b", re.I
+            r"\b(" + "|".join(re.escape(t) for t in _terms) + r")(?:s|es|ing|ed|er)?\b", re.I
         )
         _meds = sorted(MEDICATION_TERMS.keys(), key=len, reverse=True)
         self._med_re = re.compile(
             r"\b(" + "|".join(re.escape(t) for t in _meds) + r")\b", re.I
         )
+
+        # Body-part pain pattern: catches "pain in my balls", "ache in my knee" etc.
+        # that aren't covered by the exact-phrase colloquial dict
+        self._body_pain_re = re.compile(
+            r"\b(?:pain|ache|aching|hurt(?:s|ing)?|sore(?:ness)?|discomfort|burning|"
+            r"swelling|swollen|tender(?:ness)?)\s+(?:in|around|near|at|on|of)?\s*"
+            r"(?:my|his|her|the|both)?\s*"
+            r"(balls?|nut(?:s)?|testicle(?:s)?|scrota(?:l)?|scrotum|groin|penis|penile|"
+            r"vagina(?:l)?|vulva(?:r)?|uterus|womb|ovary|ovaries|ovarian|"
+            r"knee(?:s)?|hip(?:s)?|shoulder(?:s)?|elbow(?:s)?|wrist(?:s)?|ankle(?:s)?|"
+            r"shin(?:s)?|calf|calves|thigh(?:s)?|toe(?:s)?|finger(?:s)?|thumb(?:s)?|"
+            r"jaw|ear(?:s)?|eye(?:s)?|temple(?:s)?|forehead|neck|throat)",
+            re.I,
+        )
+
+        # Map body-part words -> clinical term
+        self._body_part_map = {
+            "balls": "Orchialgia / testicular pain",
+            "ball": "Orchialgia / testicular pain",
+            "nuts": "Orchialgia / testicular pain",
+            "nut": "Orchialgia / testicular pain",
+            "testicle": "Orchialgia / testicular pain",
+            "testicles": "Orchialgia / testicular pain",
+            "scrotum": "Scrotal pain",
+            "scrotal": "Scrotal pain",
+            "scrota": "Scrotal pain",
+            "groin": "Groin pain",
+            "penis": "Penile pain",
+            "penile": "Penile pain",
+            "vagina": "Vaginal pain / dyspareunia",
+            "vaginal": "Vaginal pain / dyspareunia",
+            "vulva": "Vulvar pain",
+            "vulvar": "Vulvar pain",
+            "uterus": "Uterine / pelvic pain",
+            "womb": "Uterine / pelvic pain",
+            "ovary": "Ovarian / pelvic pain",
+            "ovaries": "Ovarian / pelvic pain",
+            "ovarian": "Ovarian / pelvic pain",
+            "knee": "Knee pain",
+            "knees": "Knee pain",
+            "shoulder": "Shoulder pain",
+            "shoulders": "Shoulder pain",
+            "elbow": "Elbow pain",
+            "elbows": "Elbow pain",
+            "wrist": "Wrist pain",
+            "wrists": "Wrist pain",
+            "hip": "Hip pain",
+            "hips": "Hip pain",
+            "ankle": "Ankle pain",
+            "ankles": "Ankle pain",
+            "shin": "Shin pain",
+            "shins": "Shin pain",
+            "calf": "Calf pain",
+            "calves": "Calf pain",
+            "thigh": "Thigh pain",
+            "thighs": "Thigh pain",
+            "jaw": "Jaw pain / TMJ",
+            "ear": "Otalgia / ear pain",
+            "ears": "Otalgia / ear pain",
+            "eye": "Ocular pain",
+            "eyes": "Ocular pain",
+            "forehead": "Frontal headache / forehead pain",
+            "temple": "Temporal headache",
+            "temples": "Temporal headache",
+            "throat": "Throat pain / pharyngitis",
+            "finger": "Finger pain",
+            "fingers": "Finger pain",
+            "thumb": "Thumb pain",
+            "toe": "Toe pain",
+            "toes": "Toe pain",
+        }
 
     # ── Negation ──────────────────────────────────────────────────────────
 
@@ -1114,8 +1186,26 @@ class MedicalNLPEngine:
             "left upper quadrant",
             "right lower quadrant",
             "left lower quadrant",
+            # Genitourinary — must be BEFORE generic "head" to prevent misclassification
+            "testicle",
+            "testicular",
+            "scrotum",
+            "scrotal",
+            "groin",
+            "pelvis",
+            "pelvic",
+            "perineum",
+            "penis",
+            "penile",
+            "vagina",
+            "vaginal",
+            "vulva",
+            "ovary",
+            "ovarian",
+            # General body regions
             "head",
             "neck",
+            "throat",
             "chest",
             "abdomen",
             "back",
@@ -1136,13 +1226,13 @@ class MedicalNLPEngine:
             "lumbar",
             "thoracic",
             "cervical",
-            "groin",
             "epigastric",
         ]
         found = [
             r for r in regions if re.search(r"\b" + re.escape(r) + r"\b", ctx, re.I)
         ]
         return ", ".join(found[:3]) if found else None
+
 
     # ── Symptom extraction ────────────────────────────────────────────────
 
@@ -1231,6 +1321,29 @@ class MedicalNLPEngine:
                         source="colloquial",
                     )
                 )
+
+        # Body-part pain pattern: catches "pain in my balls", "hurt in my knee" etc.
+        for m in self._body_pain_re.finditer(text):
+            part_word = m.group(1).lower()
+            canonical = self._body_part_map.get(part_word)
+            if not canonical:
+                continue
+            if canonical in seen:
+                continue
+            seen.add(canonical)
+            ctx = self._ctx(text, m.start(), m.end())
+            symptoms.append(
+                Symptom(
+                    name=canonical,
+                    negated=self._is_negated(text, m.start()),
+                    severity=self._severity(ctx),
+                    duration=self._duration(ctx),
+                    character=self._character(ctx),
+                    location=part_word,
+                    context=ctx.strip(),
+                    source="colloquial",
+                )
+            )
 
         return symptoms
 

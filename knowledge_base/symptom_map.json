@@ -1,0 +1,353 @@
+{
+    "body_systems": {
+        "cardiovascular": {
+            "symptoms": [
+                "chest pain",
+                "chest pressure",
+                "chest tightness",
+                "palpitations",
+                "tachycardia",
+                "bradycardia",
+                "leg swelling",
+                "ankle edema",
+                "syncope",
+                "pre-syncope",
+                "calf pain",
+                "dyspnea"
+            ],
+            "anatomical_regions": [
+                "heart",
+                "thorax",
+                "vasculature",
+                "lower extremities"
+            ]
+        },
+        "respiratory": {
+            "symptoms": [
+                "cough",
+                "shortness of breath",
+                "dyspnea",
+                "wheezing",
+                "hemoptysis",
+                "productive cough",
+                "dry cough",
+                "nasal congestion",
+                "rhinorrhea",
+                "sore throat",
+                "snoring"
+            ],
+            "anatomical_regions": [
+                "lungs",
+                "bronchi",
+                "trachea",
+                "upper airway",
+                "nasal cavity"
+            ]
+        },
+        "gastrointestinal": {
+            "symptoms": [
+                "nausea",
+                "vomiting",
+                "abdominal pain",
+                "diarrhea",
+                "constipation",
+                "bloating",
+                "heartburn",
+                "dysphagia",
+                "hematochezia",
+                "melena",
+                "jaundice",
+                "loss of appetite"
+            ],
+            "anatomical_regions": [
+                "stomach",
+                "small intestine",
+                "colon",
+                "liver",
+                "gallbladder",
+                "pancreas",
+                "esophagus"
+            ]
+        },
+        "neurological": {
+            "symptoms": [
+                "headache",
+                "dizziness",
+                "vertigo",
+                "seizure",
+                "confusion",
+                "weakness",
+                "numbness",
+                "paresthesia",
+                "tremor",
+                "syncope",
+                "blurred vision",
+                "diplopia",
+                "memory impairment"
+            ],
+            "anatomical_regions": [
+                "brain",
+                "spinal cord",
+                "peripheral nerves",
+                "cerebral vasculature"
+            ]
+        },
+        "musculoskeletal": {
+            "symptoms": [
+                "back pain",
+                "neck pain",
+                "joint pain",
+                "muscle pain",
+                "morning stiffness",
+                "joint swelling"
+            ],
+            "anatomical_regions": [
+                "spine",
+                "joints",
+                "muscles",
+                "tendons",
+                "bones"
+            ]
+        },
+        "genitourinary": {
+            "symptoms": [
+                "dysuria",
+                "urinary frequency",
+                "urinary urgency",
+                "nocturia",
+                "hematuria",
+                "testicular pain",
+                "scrotal pain",
+                "pelvic pain",
+                "vaginal pain",
+                "urethral discharge",
+                "urinary incontinence"
+            ],
+            "anatomical_regions": [
+                "kidneys",
+                "bladder",
+                "urethra",
+                "testes",
+                "prostate",
+                "uterus",
+                "ovaries"
+            ]
+        },
+        "endocrine": {
+            "symptoms": [
+                "fatigue",
+                "weight gain",
+                "weight loss",
+                "polydipsia",
+                "polyuria",
+                "cold intolerance",
+                "heat intolerance",
+                "tremor",
+                "hot flashes"
+            ],
+            "anatomical_regions": [
+                "thyroid",
+                "pancreas",
+                "adrenal glands",
+                "pituitary"
+            ]
+        },
+        "dermatology": {
+            "symptoms": [
+                "rash",
+                "pruritus",
+                "urticaria",
+                "hair loss",
+                "bruising"
+            ],
+            "anatomical_regions": [
+                "skin",
+                "subcutaneous tissue",
+                "hair follicles"
+            ]
+        },
+        "psychiatry": {
+            "symptoms": [
+                "depression",
+                "anxiety",
+                "insomnia",
+                "hallucinations",
+                "suicidal ideation",
+                "mood swings",
+                "irritability",
+                "panic attacks"
+            ],
+            "anatomical_regions": [
+                "central nervous system"
+            ]
+        },
+        "ENT": {
+            "symptoms": [
+                "sore throat",
+                "ear pain",
+                "nasal congestion",
+                "epistaxis",
+                "tinnitus",
+                "hearing loss",
+                "hoarseness"
+            ],
+            "anatomical_regions": [
+                "ears",
+                "nose",
+                "throat",
+                "sinuses"
+            ]
+        }
+    },
+    "anatomical_mapping": {
+        "testicle": [
+            "testicular pain",
+            "orchialgia",
+            "scrotal pain",
+            "scrotal swelling",
+            "testicular swelling"
+        ],
+        "penis": [
+            "penile pain",
+            "urethral discharge"
+        ],
+        "thorax": [
+            "chest pain",
+            "chest pressure",
+            "chest tightness"
+        ],
+        "abdomen": [
+            "abdominal pain",
+            "epigastric pain",
+            "lower abdominal pain",
+            "bloating"
+        ],
+        "pelvis": [
+            "pelvic pain",
+            "vaginal pain",
+            "vaginal discharge"
+        ],
+        "head": [
+            "headache",
+            "cephalgia"
+        ],
+        "neck": [
+            "neck pain",
+            "cervicalgia"
+        ],
+        "back": [
+            "back pain",
+            "dorsalgia"
+        ],
+        "knee": [
+            "knee pain"
+        ],
+        "hip": [
+            "hip pain"
+        ],
+        "shoulder": [
+            "shoulder pain"
+        ],
+        "ankle": [
+            "ankle pain",
+            "ankle edema"
+        ],
+        "foot": [
+            "foot pain"
+        ],
+        "wrist": [
+            "wrist pain"
+        ],
+        "ear": [
+            "ear pain",
+            "otalgia",
+            "tinnitus",
+            "hearing loss"
+        ],
+        "eye": [
+            "eye pain",
+            "blurred vision",
+            "diplopia",
+            "red eye"
+        ],
+        "throat": [
+            "sore throat",
+            "pharyngitis",
+            "dysphagia"
+        ]
+    },
+    "severity_terms": {
+        "mild": [
+            "mild",
+            "slight",
+            "minor",
+            "minimal",
+            "little",
+            "dull",
+            "low-grade"
+        ],
+        "moderate": [
+            "moderate",
+            "moderate-severe",
+            "significant",
+            "noticeable",
+            "bothersome"
+        ],
+        "severe": [
+            "severe",
+            "severe",
+            "intense",
+            "excruciating",
+            "unbearable",
+            "sharp",
+            "stabbing",
+            "crushing",
+            "worst",
+            "terrible",
+            "awful",
+            "10/10"
+        ]
+    },
+    "duration_patterns": {
+        "minutes": [
+            "minutes",
+            "min",
+            "a few minutes",
+            "briefly"
+        ],
+        "hours": [
+            "hours",
+            "hr",
+            "hours ago",
+            "this morning",
+            "today"
+        ],
+        "days": [
+            "days",
+            "yesterday",
+            "a few days",
+            "several days",
+            "past few days"
+        ],
+        "weeks": [
+            "weeks",
+            "a week",
+            "few weeks",
+            "past week",
+            "past two weeks"
+        ],
+        "months": [
+            "months",
+            "past month",
+            "few months",
+            "long time"
+        ],
+        "years": [
+            "years",
+            "chronic",
+            "longstanding",
+            "always",
+            "for years"
+        ]
+    }
+}

@@ -1,9 +1,3 @@
-"""
-DoctorSpeak – Streamlit UI
-Fully local medical documentation system.
-Run with: streamlit run app.py
-"""
-
 import base64
 import io
 import os

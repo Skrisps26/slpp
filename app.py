@@ -1,5 +1,5 @@
 """
-MedScribe – Streamlit UI
+DoctorSpeak – Streamlit UI
 Fully local medical documentation system.
 Run with: streamlit run app.py
 """
@@ -19,7 +19,7 @@ import streamlit as st
 
 # ── Page config must be first ────────────────────────────────────────────────
 st.set_page_config(
-    page_title="MedScribe – Clinical Documentation",
+    page_title="DoctorSpeak – Clinical Documentation",
     page_icon="🏥",
     layout="wide",
     initial_sidebar_state="expanded",
@@ -397,7 +397,7 @@ def sidebar_patient_form() -> dict:
         """
     <div style="text-align:center;padding:16px 0 8px 0;">
         <span style="font-size:2rem;">🏥</span><br>
-        <span style="font-size:1.25rem;font-weight:800;color:white;letter-spacing:0.04em;">MedScribe</span><br>
+        <span style="font-size:1.25rem;font-weight:800;color:white;letter-spacing:0.04em;">DoctorSpeak</span><br>
         <span style="font-size:0.72rem;color:#aac4d8;letter-spacing:0.08em;">LOCAL CLINICAL DOCUMENTATION</span>
     </div>
     <hr style="border-color:#2a4a6b;margin:8px 0 16px 0;">
@@ -484,7 +484,7 @@ def render_report(note, pdf_bytes: bytes):
     col_dl, col_s1, col_s2, col_s3, col_s4 = st.columns([2, 1, 1, 1, 1])
 
     safe = "".join(c if c.isalnum() else "_" for c in note.patient_name)
-    fname = f"MedScribe_{safe}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
+    fname = f"DoctorSpeak_{safe}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pdf"
 
     with col_dl:
         st.download_button(
@@ -777,7 +777,7 @@ def main():
     <div style="display:flex;align-items:center;gap:14px;margin-bottom:4px;">
         <span style="font-size:2.2rem;">🏥</span>
         <div>
-            <h1 style="margin:0;font-size:1.9rem;color:#1A3557;font-weight:800;">MedScribe</h1>
+            <h1 style="margin:0;font-size:1.9rem;color:#1A3557;font-weight:800;">DoctorSpeak</h1>
             <p style="margin:0;color:#6B7C8D;font-size:0.85rem;">
                 Local AI Clinical Documentation &nbsp;·&nbsp; No API required &nbsp;·&nbsp;
                 Record → Extract → SOAP Report

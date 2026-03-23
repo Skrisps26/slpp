@@ -301,56 +301,66 @@ def render_flag(text: str):
 
 def transcribe_audio(audio_bytes: bytes) -> str:
     """
-    Transcribe audio bytes with Whisper.
-    Loads audio via scipy (no ffmpeg needed) and passes a float32
-    numpy array directly to whisper.transcribe() — works on Streamlit Cloud.
-    Returns transcript string, or None if Whisper is not installed.
+    Transcribe audio bytes using the shared transcriber module which runs
+    pyannote speaker diarization (Doctor/Patient labels) followed by Whisper.
+    Falls back to plain Whisper, then returns None if neither is available.
+
+    The audio bytes are written to a temporary WAV file so that both
+    pyannote (torchaudio) and Whisper can read from a real file path.
+    Returns the labelled transcript string, or None on failure.
     """
+    import os
+    import tempfile
+
+    from transcriber import transcribe as _transcribe
+
+    tmp_path = None
     try:
-        import numpy as np
-        import scipy.io.wavfile as wav_io
-        import whisper
-    except ImportError:
-        return None
+        # Determine suffix from content – try to detect WAV header
+        suffix = ".wav" if audio_bytes[:4] == b"RIFF" else ".mp3"
 
-    try:
-        with st.spinner("🎙️ Transcribing with Whisper..."):
-            # Load WAV via scipy (no ffmpeg dependency)
-            audio_buf = io.BytesIO(audio_bytes)
-            sample_rate, audio_data = wav_io.read(audio_buf)
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp_file:
+            tmp_file.write(audio_bytes)
+            tmp_path = tmp_file.name
 
-            # Convert to float32 in range [-1, 1] as Whisper expects
-            if audio_data.dtype == np.int16:
-                audio_float = audio_data.astype(np.float32) / 32768.0
-            elif audio_data.dtype == np.int32:
-                audio_float = audio_data.astype(np.float32) / 2147483648.0
-            elif audio_data.dtype == np.uint8:
-                audio_float = (audio_data.astype(np.float32) - 128.0) / 128.0
-            else:
-                audio_float = audio_data.astype(np.float32)
+        progress_messages: list[str] = []
 
-            # Stereo to mono
-            if audio_float.ndim == 2:
-                audio_float = audio_float.mean(axis=1)
+        def _cb(msg: str):
+            progress_messages.append(msg)
 
-            # Resample to 16000 Hz if needed (Whisper requires 16kHz)
-            if sample_rate != 16000:
-                try:
-                    import scipy.signal as signal
+        with st.spinner("🎙️ Transcribing & identifying speakers..."):
+            transcript, method = _transcribe(tmp_path, progress_callback=_cb)
 
-                    num_samples = int(len(audio_float) * 16000 / sample_rate)
-                    audio_float = signal.resample(audio_float, num_samples)
-                except Exception:
-                    pass
+        if progress_messages:
+            # Show the last meaningful progress message as an info note
+            st.caption(f"ℹ️ {progress_messages[-1]}")
 
-            # Run Whisper on the numpy array directly
-            model = whisper.load_model("base")
-            result = model.transcribe(audio_float, language="en", fp16=False)
-            return result["text"].strip()
+        if method == "whisper+diarization":
+            st.success(
+                "✅ Speaker diarization complete (Doctor / Patient labels applied)"
+            )
+        elif method == "whisper":
+            st.info(
+                "🎙️ Transcribed with Whisper (no speaker labels – diarization unavailable)"
+            )
+
+        # _manual_entry is interactive (stdin) – not usable in Streamlit
+        if method == "manual":
+            st.warning(
+                "Automatic transcription unavailable. Please paste the transcript manually."
+            )
+            return None
+
+        return transcript if transcript else None
 
     except Exception as e:
-        st.warning(f"Transcription failed: {e}. Please paste the transcript manually.")
+        st.warning(
+            f"Transcription failed: {str(e)}. Please paste the transcript manually."
+        )
         return None
+    finally:
+        if tmp_path and os.path.exists(tmp_path):
+            os.remove(tmp_path)
 
 
 def run_pipeline(transcript: str, patient_info: dict) -> tuple:

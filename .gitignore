@@ -1,3 +1,4 @@
 doctorspeak_env
 __pycache__
 .env.example
+.env

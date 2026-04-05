@@ -1,107 +1,51 @@
 """
-FAISS index builder for the clinical knowledge base.
-Embeds documents from knowledge_base/ using MiniLM.
+RAG indexer — builds FAISS index from knowledge_base/ or loads existing.
 """
-import os
-import json
 import faiss
 import numpy as np
-from typing import List, Dict
+import json
+import os
+from pathlib import Path
 from models.embedder import EmbedderModel
 
+INDEX_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                          "models", "faiss_index", "index.faiss")
+DOCS_PATH = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                         "models", "faiss_index", "docs.json")
 
-class RAGIndexer:
-    """Builds and saves a FAISS index from knowledge base documents."""
 
-    def __init__(self, knowledge_base_dir: str = "backend/knowledge_base",
-                 index_dir: str = "models/faiss_index"):
-        self.knowledge_base_dir = knowledge_base_dir
-        self.index_dir = index_dir
-        self.embedder = EmbedderModel.get_instance()
-        self.documents: List[Dict] = []
-        self.index = None
+def build_index(knowledge_base_dir: str):
+    embedder = EmbedderModel.get_instance()
+    docs = []
+    for path in Path(knowledge_base_dir).rglob("*"):
+        if path.is_file() and path.suffix in (".txt", ".md"):
+            text = path.read_text(encoding="utf-8", errors="ignore")
+            words = text.split()
+            for i in range(0, max(len(words), 300), 250):
+                chunk = " ".join(words[i:i + 300])
+                if len(chunk.strip()) > 20:
+                    docs.append({"title": path.stem, "content": chunk, "source": str(path)})
 
-    def build(self) -> faiss.Index:
-        """Load documents, embed them, and build the FAISS index."""
-        self.documents = self._load_documents()
-        if not self.documents:
-            print("[RAGIndexer] No documents found in knowledge base.")
-            self._build_empty_index()
-            return self.index
+    if not docs:
+        print(f"[RAG] WARNING: No documents in {knowledge_base_dir}. RAG disabled.")
+        return None, []
 
-        texts = [doc["content"] for doc in self.documents]
-        self.embedder.load()
-        embeddings = self.embedder.encode(texts)
+    embeddings = embedder.encode([d["content"] for d in docs]).astype(np.float32)
+    index = faiss.IndexFlatL2(384)
+    index.add(embeddings)
+    os.makedirs(os.path.dirname(INDEX_PATH), exist_ok=True)
+    faiss.write_index(index, INDEX_PATH)
+    with open(DOCS_PATH, "w") as f:
+        json.dump(docs, f)
+    print(f"[RAG] Index built with {len(docs)} chunks.")
+    return index, docs
 
-        # Ensure 2D
-        if embeddings.ndim == 1:
-            embeddings = np.expand_dims(embeddings, axis=0)
 
-        dimension = embeddings.shape[1]
-        self.index = faiss.IndexFlatL2(dimension)
-        self.index.add(embeddings.astype("float32"))
-
-        # Save index and metadata
-        os.makedirs(self.index_dir, exist_ok=True)
-        faiss.write_index(self.index, os.path.join(self.index_dir, "faiss.index"))
-
-        metadata = []
-        for doc in self.documents:
-            metadata.append({
-                "title": doc.get("title", ""),
-                "content_len": len(doc["content"]),
-            })
-        with open(os.path.join(self.index_dir, "metadata.json"), "w") as f:
-            json.dump(metadata, f)
-
-        print(f"[RAGIndexer] Built FAISS index with {len(self.documents)} documents.")
-        return self.index
-
-    def _build_empty_index(self):
-        """Create an empty FAISS index."""
-        dimension = 384  # MiniLM embedding dimension
-        self.index = faiss.IndexFlatL2(dimension)
-        os.makedirs(self.index_dir, exist_ok=True)
-        faiss.write_index(self.index, os.path.join(self.index_dir, "faiss.index"))
-
-    def _load_documents(self) -> List[Dict]:
-        """Load documents from knowledge_base directory."""
-        documents = []
-        if not os.path.exists(self.knowledge_base_dir):
-            return documents
-
-        for filename in os.listdir(self.knowledge_base_dir):
-            filepath = os.path.join(self.knowledge_base_dir, filename)
-            if not os.path.isfile(filepath):
-                continue
-
-            if filename.endswith(".txt") or filename.endswith(".md"):
-                with open(filepath, "r", encoding="utf-8") as f:
-                    content = f.read()
-                documents.append({
-                    "title": os.path.splitext(filename)[0],
-                    "content": content,
-                    "source": filepath,
-                })
-            elif filename.endswith(".json"):
-                with open(filepath, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-                if isinstance(data, list):
-                    for item in data:
-                        documents.append({
-                            "title": item.get("title", filename),
-                            "content": item.get("content", ""),
-                            "source": filepath,
-                        })
-                elif isinstance(data, dict):
-                    documents.append({
-                        "title": data.get("title", filename),
-                        "content": data.get("content", ""),
-                        "source": filepath,
-                    })
-
-        return documents
-
-    def get_documents(self) -> List[Dict]:
-        """Return the loaded documents (call after build())."""
-        return self.documents
+def load_or_build_index(knowledge_base_dir: str):
+    if os.path.exists(INDEX_PATH) and os.path.exists(DOCS_PATH):
+        index = faiss.read_index(INDEX_PATH)
+        with open(DOCS_PATH) as f:
+            docs = json.load(f)
+        print(f"[RAG] Loaded index with {len(docs)} chunks.")
+        return index, docs
+    return build_index(knowledge_base_dir) or (None, [])

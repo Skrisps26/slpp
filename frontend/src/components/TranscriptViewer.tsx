@@ -1,99 +1,70 @@
 "use client";
-import type { DialogueAct } from "@/lib/types";
+import type { DialogueActType } from "@/lib/types";
 import { useState } from "react";
 
 interface Props {
   transcript: string;
   sentences: string[];
-  dialogueActs: DialogueAct[];
+  dialogueActs: DialogueActType[];
   negationScopes: Array<{ text: string; start: number; end: number }>;
 }
 
 const LABEL_COLORS: Record<string, string> = {
-  SYMPTOM_REPORT: "bg-green-100 text-green-800 border-green-200",
-  QUESTION: "bg-blue-100 text-blue-800 border-blue-200",
-  DIAGNOSIS_STATEMENT: "bg-purple-100 text-purple-800 border-purple-200",
-  TREATMENT_PLAN: "bg-teal-100 text-teal-800 border-teal-200",
-  REASSURANCE: "bg-gray-100 text-gray-800 border-gray-200",
-  HISTORY: "bg-amber-100 text-amber-800 border-amber-200",
-  OTHER: "bg-slate-100 text-slate-800 border-slate-200",
+  SYMPTOM_REPORT: "bg-green-50 hover:bg-green-100",
+  QUESTION: "bg-blue-50 hover:bg-blue-100",
+  DIAGNOSIS_STATEMENT: "bg-purple-50 hover:bg-purple-100",
+  TREATMENT_PLAN: "bg-teal-50 hover:bg-teal-100",
+  REASSURANCE: "bg-gray-50 hover:bg-gray-100",
+  HISTORY: "bg-amber-50 hover:bg-amber-100",
+  OTHER: "",
+};
+
+const LABEL_BADGE: Record<string, string> = {
+  SYMPTOM_REPORT: "bg-green-100 text-green-800",
+  QUESTION: "bg-blue-100 text-blue-800",
+  DIAGNOSIS_STATEMENT: "bg-purple-100 text-purple-800",
+  TREATMENT_PLAN: "bg-teal-100 text-teal-800",
+  REASSURANCE: "bg-gray-200 text-gray-800",
+  HISTORY: "bg-amber-100 text-amber-800",
+  OTHER: "bg-slate-100 text-slate-600",
 };
 
 export function TranscriptViewer({ transcript, sentences, dialogueActs, negationScopes }: Props) {
   const [hoveredIdx, setHoveredIdx] = useState<number | null>(null);
-  const [highlightSource, setHighlightSource] = useState<string | null>(null);
 
-  const getNegatedRanges = () => {
-    const ranges: [number, number][] = [];
-    for (const scope of negationScopes || []) {
-      ranges.push([scope.start, scope.end]);
-    }
-    return ranges;
-  };
-
-  const negatedRanges = getNegatedRanges();
-
-  const isNegated = (start: number, end: number) => {
-    return negatedRanges.some(([s, e]) => s <= start && end <= e);
+  const isNegated = (sentenceStart: number, end: number) => {
+    return negationScopes?.some((s) => s.start <= sentenceStart && end <= s.end);
   };
 
   return (
     <section className="card">
       <h2 className="text-lg font-semibold text-slate-900 mb-4">Transcript</h2>
-      
-      {/* Dialogue act strip */}
-      <div className="mb-4">
-        <h3 className="text-sm font-medium text-slate-600 mb-2">Dialogue Acts</h3>
-        <div className="flex flex-wrap gap-1.5">
-          {dialogueActs.map((da, i) => (
-            <button
+      <div className="space-y-0.5 text-sm leading-relaxed">
+        {sentences.map((sentence, i) => {
+          const da = dialogueActs?.[i];
+          const neg = isNegated(transcript.indexOf(sentence), transcript.indexOf(sentence) + sentence.length);
+          return (
+            <span
               key={i}
-              className={`badge border ${LABEL_COLORS[da.label] || LABEL_COLORS.OTHER} cursor-pointer hover:opacity-80 transition-opacity`}
-              onClick={() => setHoveredIdx(i === hoveredIdx ? null : i)}
-              title={`${da.label} (${(da.confidence * 100).toFixed(0)}%)`}
+              className={`inline mr-1 px-1 py-0.5 rounded cursor-pointer transition-colors ${
+                i === hoveredIdx ? "ring-2 ring-amber-400 bg-amber-100" : LABEL_COLORS[da?.label ?? ""] || ""
+              }`}
+              onMouseEnter={() => setHoveredIdx(i)}
+              onMouseLeave={() => setHoveredIdx(null)}
             >
-              {da.label} ({(da.confidence * 100).toFixed(0)}%)
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Sentence-by-sentence display */}
-      <div className="space-y-1 text-base leading-relaxed">
-        {sentences.map((sentence, i) => (
-          <span
-            key={i}
-            className={`inline mr-1 px-0.5 py-0.5 rounded transition-colors cursor-pointer ${
-              i === hoveredIdx
-                ? "bg-amber-200"
-                : sentence === highlightSource
-                  ? "bg-amber-100"
-                  : ""
-            } ${
-              dialogueActs[i]
-                ? LABEL_COLORS[dialogueActs[i].label]
-                : ""
-            }`}
-            onMouseEnter={() => setHoveredIdx(i)}
-            onMouseLeave={() => setHoveredIdx(null)}
-          >
-            {isNegated(
-              transcript.indexOf(sentence),
-              transcript.indexOf(sentence) + sentence.length
-            ) && (
-              <span className="line-through text-red-600">{sentence}</span>
-            )}
-            {!isNegated(
-              transcript.indexOf(sentence),
-              transcript.indexOf(sentence) + sentence.length
-            ) && sentence}
-            {hoveredIdx === i && dialogueActs[i] && (
-              <span className="ml-1 text-xs text-slate-500">
-                [{dialogueActs[i].label}: {(dialogueActs[i].confidence * 100).toFixed(0)}%]
-              </span>
-            )}
-          </span>
-        ))}
+              {neg ? (
+                <span className="line-through text-red-500 opacity-70">{sentence}</span>
+              ) : (
+                <span className="text-slate-700">{sentence}</span>
+              )}
+              {hoveredIdx === i && da && (
+                <span className={`ml-1 badge text-[10px] ${LABEL_BADGE[da.label] ?? LABEL_BADGE.OTHER}`}>
+                  {da.label} ({Math.round(da.confidence * 100)}%)
+                </span>
+              )}
+            </span>
+          );
+        })}
       </div>
     </section>
   );

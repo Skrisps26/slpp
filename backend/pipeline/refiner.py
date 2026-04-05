@@ -3,37 +3,14 @@ Stage 4: Refinement Layer.
 Self-correction loop: re-prompts LLM to fix hallucinated sentences.
 Max 2 refinement iterations.
 """
-import json
 import httpx
 import os
-from typing import List
 
 from schemas.soap import SOAPNote
 from schemas.verification import VerificationResult
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/generate")
-MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:3b-instruct")
-
-
-def _build_refinement_prompt_template():
-    lines = [
-        "You are revising a SOAP note. The following sentence(s) were flagged as NOT "
-        "supported by the original transcript:",
-        "",
-        "FLAGGED SENTENCES:",
-        "{flagged}",
-        "",
-        "ORIGINAL TRANSCRIPT:",
-        "{transcript}",
-        "",
-        "Please revise ONLY the flagged sentences so they are fully supported by the transcript. "
-        "Do not change any other sentences. Return the REVISED sections as valid JSON "
-        "with keys matching the section names (subjective, objective, assessment, plan).",
-    ]
-    return "\n".join(lines)
-
-
-REFINEMENT_PROMPT_TEMPLATE = _build_refinement_prompt_template()
+MODEL = os.environ.get("OLLAMA_MODEL", "mistral:7b-instruct-q4_K_M")
 
 
 class RefinementLayer:
@@ -43,46 +20,82 @@ class RefinementLayer:
         self.generator = generator
         self.verifier = verifier
 
-    async def refine(self, transcript: str, current_soap: SOAPNote,
+    async def refine(self, transcript: str, soap: SOAPNote,
                      verification: VerificationResult) -> SOAPNote:
-        """Refine flagged sentences and return improved SOAP note."""
-        flagged = verification.hallucinated_sentences
-        if not flagged:
-            return current_soap
+        """
+        For each hallucinated sentence: re-prompt LLM to rewrite it.
+        Replace hallucinated sentences in-place. Return patched SOAPNote.
+        """
+        soap_dict = {
+            "subjective": soap.subjective,
+            "objective": soap.objective,
+            "assessment": soap.assessment,
+            "plan": soap.plan,
+        }
 
-        flagged_text = "\n".join([
-            f"- [{s.soap_section}] {s.soap_sentence}" for s in flagged
-        ])
+        for bad in verification.hallucinated_sentences:
+            section = bad.soap_section
+            current_text = soap_dict.get(section, "")
 
-        prompt = REFINEMENT_PROMPT_TEMPLATE.format(
-            flagged=flagged_text,
-            transcript=transcript,
+            if bad.soap_sentence not in current_text:
+                continue   # already replaced in a previous pass
+
+            rewritten = await self._rewrite_sentence(
+                transcript=transcript,
+                soap_section=section,
+                bad_sentence=bad.soap_sentence,
+                full_section_text=current_text,
+            )
+
+            if rewritten:
+                soap_dict[section] = current_text.replace(bad.soap_sentence, rewritten, 1)
+            else:
+                # LLM said nothing supports this sentence — remove it
+                soap_dict[section] = current_text.replace(bad.soap_sentence, "", 1).strip()
+
+        return SOAPNote(
+            subjective=soap_dict["subjective"],
+            objective=soap_dict["objective"],
+            assessment=soap_dict["assessment"],
+            plan=soap_dict["plan"],
+            differentials=soap.differentials,   # differentials not re-verified here
         )
 
-        try:
-            async with httpx.AsyncClient(timeout=120.0) as client:
-                response = await client.post(OLLAMA_URL, json={
-                    "model": MODEL,
-                    "prompt": prompt,
-                    "stream": False,
-                    "options": {
-                        "temperature": 0.1,
-                        "top_p": 0.9,
-                        "num_predict": 512,
-                    },
-                })
-                response.raise_for_status()
-                raw = response.json()["response"]
+    async def _rewrite_sentence(self, transcript: str, soap_section: str,
+                                 bad_sentence: str, full_section_text: str) -> str:
+        """Re-prompt LLM to rewrite a hallucinated sentence."""
+        prompt = f"""You are a clinical documentation assistant performing a correction task.
 
-                # Try to parse JSON
-                revised = json.loads(raw)
+The following sentence in the {soap_section.upper()} section of a SOAP note is NOT supported
+by the patient-doctor transcript. You must rewrite it using only information from the transcript,
+or return an empty string if nothing in the transcript supports it.
 
-                # Merge revised sections into current SOAP
-                for section in ["subjective", "objective", "assessment", "plan"]:
-                    if section in revised:
-                        setattr(current_soap, section, revised[section])
+TRANSCRIPT:
+{transcript}
 
-        except Exception as e:
-            print(f"[RefinementLayer] Refinement error: {e}, keeping current SOAP")
+PROBLEMATIC SENTENCE (not in transcript):
+"{bad_sentence}"
 
-        return current_soap
+SECTION CONTEXT:
+{full_section_text}
+
+Rules:
+1. Use ONLY information present in the transcript above.
+2. Maintain clinical documentation tone.
+3. If nothing in the transcript supports this sentence, return exactly: REMOVE
+4. Return ONLY the rewritten sentence or REMOVE. No explanation, no preamble.
+
+REWRITTEN:"""
+
+        async with httpx.AsyncClient(timeout=60.0) as client:
+            resp = await client.post(OLLAMA_URL, json={
+                "model": MODEL,
+                "prompt": prompt,
+                "stream": False,
+                "options": {"temperature": 0.1, "num_predict": 150},
+            })
+
+        raw = resp.json().get("response", "").strip().strip('"').strip("'")
+        if raw.upper() == "REMOVE" or not raw:
+            return ""
+        return raw

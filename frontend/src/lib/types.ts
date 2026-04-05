@@ -1,48 +1,47 @@
-// TypeScript types mirroring backend schemas
+// TypeScript types mirroring backend schemas (AGENTS.md v2)
 
-export interface Entity {
+export interface ClinicalEntity {
   text: string;
-  entity_type: string;
+  type: string;
   start: number;
   end: number;
-  confidence: number;
   negated: boolean;
+  uncertain: boolean;
+  confidence: number;
 }
 
-export interface TemporalEvent {
+export interface DialogueActType {
+  sentence: string;
+  sentence_index: number;
+  label: string;
+  confidence: number;
+  speaker: string;
+}
+
+export interface TemporalEventType {
   text: string;
-  temporal_type: string;
+  type: string;
   normalized: string;
   start: number;
   end: number;
 }
 
-export interface DialogueAct {
-  text: string;
-  label: string;
-  confidence: number;
-}
-
 export interface ClinicalEntities {
-  symptoms: Entity[];
-  medications: Entity[];
-  diagnoses: Entity[];
-  vitals: Entity[];
-  negation_scopes: Array<{
-    text: string;
-    type: string;
-    start: number;
-    end: number;
-  }>;
-  dialogue_acts: DialogueAct[];
-  temporal_events: TemporalEvent[];
+  symptoms: ClinicalEntity[];
+  medications: ClinicalEntity[];
+  diagnoses: ClinicalEntity[];
+  vitals: ClinicalEntity[];
+  dialogue_acts: DialogueActType[];
+  temporal_events: TemporalEventType[];
   sentences: string[];
+  negation_scopes: Array<{ text: string; type: string; start: number; end: number }>;
 }
 
-export interface DifferentialDiagnosis {
+export interface Differential {
   diagnosis: string;
   evidence: string;
   likelihood: string;
+  kb_source: string;
 }
 
 export interface SOAPNote {
@@ -50,7 +49,7 @@ export interface SOAPNote {
   objective: string;
   assessment: string;
   plan: string;
-  differentials: DifferentialDiagnosis[];
+  differentials: Differential[];
 }
 
 export interface SentenceVerification {
@@ -70,14 +69,16 @@ export interface VerificationResult {
 
 export interface GCISResponse {
   transcript: string;
+  patient_info: { patient_name?: string; patient_age?: number; patient_id?: string };
   entities: ClinicalEntities;
   soap: SOAPNote;
   verification: VerificationResult;
   refinement_iterations: number;
+  pipeline_version: string;
 }
 
 export interface PatientInfo {
   patient_name: string;
-  patient_age: number;
+  patient_age: number | string;
   patient_id: string;
 }

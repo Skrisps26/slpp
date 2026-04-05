@@ -1,38 +1,33 @@
-# Virtual environment
-.venv/
-venv/
-
 # Python
 __pycache__/
 *.pyc
 *.pyo
 *.egg-info/
-*.egg
 dist/
 build/
+.eggs/
 
-# HuggingFace cache
-.huggingface/
+# Virtual environment
+.venv/
+venv/
+backend/.venv/
+
+# Models (large weights)
+models/
+*.bin
+*.safetensors
+!models/.gitignore
+
+# Training data
+data/
+
+# Logs
+logs/
 
 # Node
 node_modules/
 frontend/.next/
 frontend/out/
-
-# Data and caches
-data/negex/
-.cache/
-logs/
-
-# Model weights (tracked via HuggingFace or separate)
-# Uncomment to include models in repo:
-# !models/
-models/dialogue_act/
-models/faiss_index/
-models/.gitkeep
-models/*.pt
-models/*.bin
-models/*.safetensors
 
 # IDE
 .vscode/
@@ -47,3 +42,8 @@ Thumbs.db
 
 # Results
 results/
+*.lock
+*.docx
+
+# Reports (generated)
+GCIS_Project_Report.docx

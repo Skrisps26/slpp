@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  ollama:
+    image: ollama/ollama:latest
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama_data:/root/.ollama
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    entrypoint: >
+      /bin/sh -c "ollama serve &
+      sleep 5 &&
+      ollama pull mistral:7b-instruct-q4_K_M &&
+      wait"
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./models:/app/models
+      - ./backend/knowledge_base:/app/knowledge_base
+    environment:
+      - OLLAMA_URL=http://ollama:11434
+      - MODELS_DIR=/app/models
+    depends_on:
+      - ollama
+    command: python -m uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_BACKEND_URL=http://localhost:8000
+    depends_on:
+      - backend
+    command: npm run dev
+
+volumes:
+  ollama_data:

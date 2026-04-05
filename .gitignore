@@ -1,0 +1,49 @@
+# Virtual environment
+.venv/
+venv/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+*.egg
+dist/
+build/
+
+# HuggingFace cache
+.huggingface/
+
+# Node
+node_modules/
+frontend/.next/
+frontend/out/
+
+# Data and caches
+data/negex/
+.cache/
+logs/
+
+# Model weights (tracked via HuggingFace or separate)
+# Uncomment to include models in repo:
+# !models/
+models/dialogue_act/
+models/faiss_index/
+models/.gitkeep
+models/*.pt
+models/*.bin
+models/*.safetensors
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Environment
+.env
+
+# Results
+results/

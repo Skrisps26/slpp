@@ -1,0 +1,28 @@
+Hypertension (High Blood Pressure)
+
+Hypertension is a common cardiovascular condition where the force of blood against artery walls is consistently too high.
+
+Classification:
+- Normal: < 120/80 mmHg
+- Elevated: 120-129/<80 mmHg
+- Stage 1: 130-139/80-89 mmHg
+- Stage 2: >= 140/90 mmHg
+- Hypertensive Crisis: > 180/120 mmHg
+
+Risk Factors:
+- Age
+- Race (more common in African Americans)
+- Family history
+- Being overweight or obese
+- Physical inactivity
+- Tobacco use
+- Too much salt (sodium)
+- Too little potassium
+- Stress
+- Chronic conditions (kidney disease, diabetes, sleep apnea)
+
+First-line treatments:
+- ACE inhibitors (lisinopril, enalapril)
+- ARBs (losartan, valsartan)
+- Calcium channel blockers (amlodipine)
+- Thiazide diuretics (hydrochlorothiazide)

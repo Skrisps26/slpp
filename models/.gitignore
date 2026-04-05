@@ -1,0 +1,9 @@
+# ollama_data is managed by Docker
+models/
+data/
+logs/
+__pycache__/
+*.pyc
+.env
+.vscode/
+.idea/

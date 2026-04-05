@@ -6,12 +6,21 @@ export async function processTranscript(
   transcript: string,
   patientInfo: PatientInfo
 ): Promise<GCISResponse> {
+  const age = patientInfo.patient_age ?? 0;
   const res = await fetch(`${BACKEND_URL}/api/process/transcript`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ transcript, ...patientInfo }),
+    body: JSON.stringify({
+      transcript,
+      patient_name: patientInfo.patient_name || "",
+      patient_age: typeof age === "number" ? age : parseInt(age, 10) || 0,
+      patient_id: patientInfo.patient_id || "",
+    }),
   });
-  if (!res.ok) throw new Error(`Backend error: ${res.status}`);
+  if (!res.ok) {
+    const errorBody = await res.text().catch(() => "");
+    throw new Error(`Backend error ${res.status}: ${errorBody}`);
+  }
   return res.json();
 }
 

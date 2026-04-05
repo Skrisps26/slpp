@@ -3,7 +3,7 @@ GCIS API — FastAPI entry point
 """
 from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from pipeline.orchestrator import GCISOrchestrator
 import uvicorn
 import os
@@ -16,9 +16,10 @@ app = FastAPI(title="GCIS API", version="2.0.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
+    allow_credentials=True,
 )
 
 
@@ -27,6 +28,18 @@ class TranscriptRequest(BaseModel):
     patient_name: str = ""
     patient_age: int = 0
     patient_id: str = ""
+
+    model_config = {"coerce_numbers_to_str": True, "strict": False}
+
+    @field_validator("patient_age", mode="before")
+    @classmethod
+    def coerce_patage(cls, v):
+        if isinstance(v, str):
+            try:
+                return int(v)
+            except (ValueError, TypeError):
+                return 0
+        return v or 0
 
 
 # Global orchestrator (lazy-loaded)

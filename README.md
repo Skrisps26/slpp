@@ -4,7 +4,47 @@ A research-grade clinical NLP pipeline for generating verified SOAP notes from c
 
 ## Architecture
 
+```mermaid
+flowchart LR
+    subgraph Frontend["🌐 Frontend (Next.js 14)"]
+        A[AudioRecorder /<br/>Text Input]
+    end
+
+    subgraph Backend["⚙️ Backend (FastAPI)"]
+        direction TB
+        subgraph S1["STAGE 1: EXTRACTION (CPU)"]
+            B["NER: BioBERT\n+Negation: BioBERT\n+Dialogue: MiniLM-L6\n+Temporal: HeidelTime"]
+        end
+        subgraph S2["STAGE 2: GENERATION (GPU)"]
+            C["Ollama LLM\nqwen2.5:3b-instruct"]
+        end
+        subgraph S3["STAGE 3: VERIFICATION (CPU)"]
+            D["NLI: DeBERTa-v3-small\n+Cosine Attribution"]
+        end
+        subgraph S4["STAGE 4: REFINEMENT (GPU)"]
+            E["LLM Self-Correction\n(max 2 iterations)"]
+        end
+        
+        D -->|faithfulness ≥ 0.85| F["✅ Verified\nSOAP Note"]
+        D -->|faithfulness < 0.85| E
+        E -.->|re-loop| S2
+        S2 -.-> RAG
+    end
+
+    subgraph External["📚 External Services"]
+        Ollama["Ollama Server<br/>GPU VRAM ~2.3GB"]
+        RAG[("Knowledge Base<br/>FAISS Index")]
+    end
+
+    A -->|Audio / Text| B
+    B --> C
+    S2 -.-> D
+    S2 <--> RAG
+    C <--> Ollama
+    E <--> Ollama
 ```
+
+## Mermaid
 [Audio/Text Input]
     │
     ▼

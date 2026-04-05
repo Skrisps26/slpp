@@ -12,7 +12,7 @@ from schemas.soap import SOAPNote
 from rag.retriever import RAGRetriever
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/generate")
-MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:1.5b-instruct")
+MODEL = os.environ.get("OLLAMA_MODEL", "qwen2.5:3b-instruct")
 
 SOAP_SCHEMA = {
     "type": "object",

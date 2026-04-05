@@ -50,7 +50,7 @@ class GCISOrchestrator:
         soap_draft = await self.generator.generate(transcript, entities, patient_info)
 
         print("[Orchestrator] Stage 3: Verifying SOAP note...")
-        verification = self.verifier.verify(transcript, soap_draft, entities.sentences)
+        verification = self.verifier.verify(transcript, soap_draft)
 
         # Stage 4: Refine if needed
         final_soap = soap_draft

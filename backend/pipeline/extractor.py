@@ -86,10 +86,10 @@ class ExtractionLayer:
             pass
 
         # Build entity lists by type
-        symptoms = [e for e in entities if e.type == "SYMPTOM"]
-        medications = [e for e in entities if e.type == "MEDICATION"]
-        diagnoses = [e for e in entities if e.type == "DIAGNOSIS"]
-        vitals = [e for e in entities if e.type == "VITAL"]
+        symptoms = [e for e in entities if e.entity_type == "SYMPTOM"]
+        medications = [e for e in entities if e.entity_type == "MEDICATION"]
+        diagnoses = [e for e in entities if e.entity_type == "DIAGNOSIS"]
+        vitals = [e for e in entities if e.entity_type == "VITAL"]
 
         return ClinicalEntities(
             symptoms=symptoms,

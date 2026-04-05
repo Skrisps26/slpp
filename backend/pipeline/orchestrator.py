@@ -74,8 +74,9 @@ class GCISOrchestrator:
             "refinement_iterations": iterations,
         }
 
-    async def process_audio(self, audio_bytes: bytes) -> dict:
+    async def process_audio(self, audio_bytes: bytes, filename: str = "audio.wav") -> dict:
         """Process audio bytes through the full pipeline."""
         print("[Orchestrator] Transcribing audio...")
-        transcript = self.transcriber.transcribe_bytes(audio_bytes)
+        transcript = self.transcriber.transcribe_bytes(audio_bytes, filename=filename)
+        print(f"[Orchestrator] Transcription complete ({len(transcript)} chars)")
         return await self.process_text(transcript, {})

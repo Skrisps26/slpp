@@ -6,14 +6,14 @@ export async function processTranscript(
   transcript: string,
   patientInfo: PatientInfo
 ): Promise<GCISResponse> {
-  const age = patientInfo.patient_age ?? 0;
+  const age = typeof patientInfo.patient_age === "number" ? patientInfo.patient_age : (parseInt(String(patientInfo.patient_age), 10) || 0);
   const res = await fetch(`${BACKEND_URL}/api/process/transcript`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
       transcript,
       patient_name: patientInfo.patient_name || "",
-      patient_age: typeof age === "number" ? age : parseInt(age, 10) || 0,
+      patient_age: age,
       patient_id: patientInfo.patient_id || "",
     }),
   });
@@ -24,14 +24,30 @@ export async function processTranscript(
   return res.json();
 }
 
-export async function processAudio(audioBlob: Blob): Promise<GCISResponse> {
-  const form = new FormData();
-  form.append("file", audioBlob, "recording.wav");
+export async function processAudio(
+  file: File,
+  patientInfo: PatientInfo
+): Promise<GCISResponse> {
+  const formData = new FormData();
+  formData.append("file", file);
+  // Send patient info as JSON in a separate field
+  formData.append(
+    "patient_info",
+    JSON.stringify({
+      patient_name: patientInfo.patient_name || "",
+      patient_age: typeof patientInfo.patient_age === "number" ? patientInfo.patient_age : (parseInt(String(patientInfo.patient_age), 10) || 0),
+      patient_id: patientInfo.patient_id || "",
+    })
+  );
+
   const res = await fetch(`${BACKEND_URL}/api/process/audio`, {
     method: "POST",
-    body: form,
+    body: formData,
   });
-  if (!res.ok) throw new Error(`Backend error: ${res.status}`);
+  if (!res.ok) {
+    const errorBody = await res.text().catch(() => "");
+    throw new Error(`Backend error ${res.status}: ${errorBody}`);
+  }
   return res.json();
 }
 

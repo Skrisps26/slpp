@@ -1,6 +1,8 @@
 """
 Stage 3: Verification Layer.
-NLI-based hallucination detection + sentence attribution.
+Sentence attribution + faithfulness scoring.
+Uses embedding cosine similarity as primary metric
+with NLI as secondary contradiction detection.
 Runs on CPU using DeBERTa-v3-small.
 """
 import os
@@ -12,9 +14,13 @@ from models.nli import NLIModel
 from models.embedder import EmbedderModel
 from schemas.verification import VerificationResult, SentenceVerification
 
+# Cosine similarity thresholds for sentence-level verification
+ENTAILMENT_THRESHOLD = 0.65   # Similarity >= 0.65 → ENTAILED
+CONTRADICTION_BELOW = 0.35    # Similarity < 0.35 AND NLI contradicts → CONTRADICTED
+
 
 class VerificationLayer:
-    """Verifies SOAP note sentences against the source transcript using NLI."""
+    """Verifies SOAP note sentences against the source transcript."""
 
     def __init__(self):
         self.nli: NLIModel = None
@@ -38,60 +44,71 @@ class VerificationLayer:
         if not soap_sentences:
             return VerificationResult(sentence_results=[], faithfulness_score=1.0)
 
-        # Split transcript into individual sentences for better NLI matching
         transcript_sentences = self._split_sentences(transcript)
 
         verified = []
         for soap_sent in soap_sentences:
-            # NLI-score against the FULL transcript (catches contradictions across context)
-            nli_full = self.nli.score(transcript, soap_sent["text"])
-            
-            # Find the best-matching transcript sentence
-            source_sentence, similarity = self._find_source_with_score(soap_sent["text"], transcript_sentences)
-            
-            # NLI-score against the best-matching sentence (more precise)
-            if source_sentence:
-                nli_source = self.nli.score(source_sentence, soap_sent["text"])
-            else:
-                nli_source = nli_full
+            source_sentence, similarity = self._find_source_with_score(
+                soap_sent["text"], transcript_sentences
+            )
 
-            # Use sentence-level if it's ENTAILED with high confidence,
-            # otherwise use full transcript (safer — catches cross-sentence contradictions)
-            if nli_source["label"] == "ENTAILED" and nli_source["confidence"] >= 0.75:
-                nli_result = nli_source
-            elif nli_source["label"] == "CONTRADICTED" and nli_source["confidence"] >= 0.5:
-                nli_result = nli_source
+            # Primary: use cosine similarity for paraphrase detection
+            if similarity >= ENTAILMENT_THRESHOLD:
+                label = "ENTAILED"
+                confidence = round(similarity, 4)
+            elif similarity < CONTRADICTION_BELOW and source_sentence:
+                # Only flag as contradicted if NLI confirms it
+                nli_result = self.nli.score(source_sentence, soap_sent["text"])
+                if nli_result["label"] == "CONTRADICTED":
+                    label = "CONTRADICTED"
+                    confidence = nli_result["confidence"]
+                else:
+                    label = "NEUTRAL"
+                    confidence = round(similarity, 4)
+            elif source_sentence:
+                # Low-ish similarity but not below threshold — could be summary
+                nli_result = self.nli.score(source_sentence, soap_sent["text"])
+                if nli_result["label"] == "CONTRADICTED":
+                    label = "CONTRADICTED"
+                    confidence = nli_result["confidence"]
+                else:
+                    label = "NEUTRAL"
+                    confidence = round(similarity, 4)
             else:
-                nli_result = nli_full
+                # No matching sentence found at all
+                label = "CONTRADICTED"
+                confidence = 0.0
 
             sv = SentenceVerification(
                 soap_sentence=soap_sent["text"],
                 soap_section=soap_sent["section"],
-                label=nli_result["label"],
-                confidence=nli_result["confidence"],
+                label=label,
+                confidence=confidence,
                 source_transcript_sentence=source_sentence or "",
-                is_hallucinated=(nli_result["label"] == "CONTRADICTED"),
+                similarity=round(similarity, 4) if source_sentence else 0.0,
+                is_hallucinated=(label == "CONTRADICTED"),
             )
             verified.append(sv)
 
-        entailed = sum(1 for v in verified if v.label == "ENTAILED")
-        faithfulness_score = entailed / len(verified) if verified else 0.0
+        # Faithfulness: only contradictions reduce the score
+        contradiction_count = sum(1 for v in verified if v.label == "CONTRADICTED")
+        faithfulness_score = 1.0 - (contradiction_count / len(verified)) if verified else 1.0
 
         return VerificationResult(
             sentence_results=verified,
-            faithfulness_score=faithfulness_score,
+            faithfulness_score=round(faithfulness_score, 4),
             hallucinated_sentences=[v for v in verified if v.is_hallucinated],
         )
 
     def _find_source_with_score(self, soap_sentence: str, transcript_sentences: list):
         """Find the most similar transcript sentence and its similarity score."""
         if not transcript_sentences:
-            return "", 0.0
+            return None, 0.0
         soap_emb = self.embedder.encode([soap_sentence])
         transcript_embs = self.embedder.encode(transcript_sentences)
         sims = cosine_similarity(soap_emb, transcript_embs)[0]
-        best_idx = np.argmax(sims)
-        return transcript_sentences[best_idx], sims[best_idx]
+        best_idx = int(np.argmax(sims))
+        return transcript_sentences[best_idx], float(sims[best_idx])
 
     @staticmethod
     def _split_sentences(text: str) -> list:

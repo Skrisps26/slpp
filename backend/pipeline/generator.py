@@ -40,9 +40,14 @@ SOAP_SCHEMA = {
 def _build_prompt_template():
     lines = [
         "You are a clinical documentation assistant. Generate a SOAP note.",
+        "CRITICAL RULES:",
+        "1. Symptoms marked as DENIED must NEVER appear as present in your note.",
+        "2. Use 'Patient denies X' or 'No history of X' for denied symptoms.",
+        "3. Do not add any symptom, medication, or diagnosis not explicitly in the transcript.",
+        "4. Return ONLY valid JSON matching the required structure.",
         "",
-        "CONFIRMED SYMPTOMS: {symptoms}",
-        "DENIED SYMPTOMS: {denied}",
+        "CONFIRMED SYMPTOMS (actually present): {symptoms}",
+        "DENIED SYMPTOMS (NOT present - do NOT list as present!): {denied}",
         "MEDICATIONS: {medications}",
         "TEMPORAL CONTEXT: {temporal}",
         "DIAGNOSES MENTIONED: {diagnoses}",
@@ -53,9 +58,7 @@ def _build_prompt_template():
         "ORIGINAL TRANSCRIPT:",
         "{transcript}",
         "",
-        "Generate a SOAP note as valid JSON. Every claim MUST be supported "
-        "by something in the transcript. Do not invent symptoms, medications, "
-        "or diagnoses not present in the transcript.",
+        "Generate a SOAP note as valid JSON. Every claim MUST be supported by the transcript.",
         "Return ONLY valid JSON matching this structure:",
         "{schema}",
     ]

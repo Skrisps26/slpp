@@ -9,10 +9,11 @@ class SentenceVerification:
     """Verification result for a single SOAP sentence."""
     soap_sentence: str
     soap_section: str
-    label: str  # ENTAILED, NEUTRAL, CONTRADICTED
+    label: str
     confidence: float
     source_transcript_sentence: str
     is_hallucinated: bool = False
+    similarity: float = 0.0
 
     def to_dict(self) -> dict:
         return {
